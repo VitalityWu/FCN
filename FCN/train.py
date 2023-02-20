@@ -55,6 +55,22 @@ class VGG_fcn32s(nn.Module):
         self.layer4 = Layer(256,[512,512,512,512])  #第四组
         self.pool4 = nn.MaxPool2d(kernel_size=2,stride=2) #降采样 /16
         self.layer5 = Layer(512,[512,512,512,512])
-        self.pool5 = nn.MaxPool2d(kernel_size=2,stride=2)
+        self.pool5 = nn.MaxPool2d(kernel_size=2,stride=2)  #降采样  /32
+
+
+        #modify to be compatible with segmentation and classification
+        #self.fc6 = nn.Linear(512*7*7,4096)#全连接层
+
+        self.fc6 = nn.Conv2d(512,4096,7)  #padding=0
+        self.relu6 = nn.ReLU(inplace=True)
+        self.drop6 = nn.Dropout()
+
+        self.fc7 = nn.Conv2d(4096,4096,1)
+        self.relu7 = nn.ReLU(inplace=True)
+        self.drop7 = nn.Dropout()
+
+        self.score = nn.Conv2d(4096,n_class,1)
+
+        self.upscore = nn.ConvTranspose2d(n_class,n_class,64,32)  #上采样32倍
 
 
